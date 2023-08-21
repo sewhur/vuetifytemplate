@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>a</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.3.13/vuetify.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.3.13/vuetify-labs.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.47/vue.global.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/4.1.6/vue-router.global.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.6.2/fuse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.3.13/vuetify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.3.13/vuetify-labs.min.js"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/7.2.96/css/materialdesignicons.min.css" />
+</head>
+
+<body>
+  <div id="app">
+    <v-app class="bg-teal-lighten-5">
+      <v-app-bar title="a" color="teal" absolute density="compact"></v-app-bar>
+      <v-main>
+        <router-view :key="this.$route.fullPath"></router-view>
+      </v-main>
+    </v-app>
+  </div>
+</body>
+
+<script>
+
+  const { createRouter, createWebHashHistory } = VueRouter
+  const { createApp } = Vue
+  const { createVuetify } = Vuetify
+  const vuetify = createVuetify()
+
+  const app = createApp({
+    data() {
+      return {
+      }
+    },
+    created: function () {
+    },
+    mounted: function () {
+    },
+    methods: {
+    },
+  })
+
+  const homeComponent = {
+    data() {
+      return {
+        eq: [], weatherArea: [], weatherAreaSearch: null, weatherAreaResult: [], o: null,
+        dialog: false, itemsPerPageE: 7, itemsPerPageW: 7, headersW: [
+          { title: 'name', align: 'start', sortable: true, key: 'item.name' },
+          { title: 'act', align: 'start', sortable: false, key: 'actions' },
+        ], headersE: [
+          { title: 'at', align: 'start', sortable: true, key: 'at' },
+          { title: 'anm', align: 'start', sortable: true, key: 'anm' },
+          { title: 'mag', align: 'start', sortable: true, key: 'mag' },
+          { title: 'maxi', align: 'start', sortable: true, key: 'maxi' },
+        ]
+      }
+    },
+    created: function () {
+      this.eqLoad()
+      this.weatherAreaLoad()
+    },
+    methods: {
+      eqLoad: function () {
+        fetch("https://www.jma.go.jp/bosai/quake/data/list.json")
+          .then(response => {
+            return response.json()
+          })
+          .then(json => {
+            var a = json
+            a.forEach(element => {
+              element.at = this.jpdate(element.at)
+            })
+            this.eq = a.filter(e => (e.ttl == "震源・震度情報"))
+          })
+      },
+      weatherAreaLoad: function () {
+        fetch("https://www.jma.go.jp/bosai/common/const/area.json")
+          .then(response => {
+            return response.json();
+          })
+          .then(json => {
+            var c = Object.keys(json.class20s)
+            this.weatherArea = []
+            c.forEach(i => {
+              var p = json.class20s[i]
+              p.code = i
+              this.weatherArea.push(p)
+            })
+            this.weatherAreaResult = []
+            this.weatherArea.forEach(i => {
+              var p = { item: null }
+              p.item = i
+              this.weatherAreaResult.push(p)
+            })
+          })
+      },
+      weatherAreaSearchExec: function () {
+        const fuse = new Fuse(this.weatherArea, { keys: ['name'] })
+        this.weatherAreaResult = fuse.search(this.weatherAreaSearch)
+      },
+      goWeather: function (code) {
+        this.o = "Loading..."
+        this.dialog = true
+        fetch("https://www.jma.go.jp/bosai/forecast/data/overview_forecast/" + code.substring(0, 4) + "00" + ".json")
+          .then(response => {
+            return response.json();
+          })
+          .then(json => {
+            this.o = json.text
+          })
+      },
+      jpdate: function (at) {
+        var date = new Date(at)
+        jpdate = date.toLocaleString('ja', {
+          "hour12": false,
+          "year": "numeric",
+          "month": "2-digit",
+          "day": "2-digit",
+          "hour": "2-digit",
+          "minute": "2-digit"
+        })
+        return jpdate
+      },
+    },
+    template: `
+      <v-container fluid>
+        <v-row>
+          <v-col>
+            <v-card>
+              <v-card-title class="d-flex flex-row align-center">
+                <div>a</div>
+                <div class="ml-auto" style="width:300px">
+                  <v-text-field density="compact" variant="underlined" append-inner-icon="mdi-magnify"
+                    single-line hide-details @click:append-inner="weatherAreaSearchExec"
+                    v-model="weatherAreaSearch" v-on:keydown.enter="weatherAreaSearchExec">
+                  </v-text-field>
+                </div>
+              </v-card-title>
+              <v-data-table v-model:items-per-page="itemsPerPageW" :headers="headersW"
+                :items="weatherAreaResult" item-value="name" class="elevation-1">
+                <template v-slot:item.actions="{ item }">
+                  <v-btn color="teal" size="small" @click="goWeather(item.selectable.item.parent)">Go</v-btn>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-col>
+          <v-col>
+            <v-card>
+              <v-card-title class="d-flex flex-row align-center">
+                <div>a</div>
+                <div class="ml-auto">
+                  <v-btn color="teal" size="small" icon="mdi-reload" @click="eqLoad"></v-btn>
+                </div>
+              </v-card-title>
+              <v-data-table v-model:items-per-page="itemsPerPageE" :headers="headersE"
+                :items="eq" item-value="name" class="elevation-1">
+              </v-data-table>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-bottom-sheet v-model="dialog">
+        <v-card>
+          <v-card-text>{{o}}</v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" block @click="dialog = false; o = null;">閉じる</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-bottom-sheet>
+    `,
+  }
+
+  const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+      { path: '/', component: homeComponent },
+    ],
+  })
+
+  app.use(router)
+  app.use(vuetify)
+  app.mount('#app')
+
+</script>
+
+</html>
