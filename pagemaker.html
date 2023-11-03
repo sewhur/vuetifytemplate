@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.47/vue.global.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet" type="text/css">
+  <link href="https://cdn.jsdelivr.net/npm/quasar@2.13.0/dist/quasar.prod.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <div id="app">
+    <a-a v-if="!edit"></a-a>
+    <b-b v-if="edit"></b-b>
+  </div>
+</body>
+
+<script id="quesar1" src="https://cdn.jsdelivr.net/npm/quasar@2.13.0/dist/quasar.umd.prod.js"></script>
+<script id="quesar1" src="https://cdn.jsdelivr.net/npm/quasar@2.13.0/dist/quasar.umd.prod.js"></script>
+<script type="application/json" id="page">{"id":"1","upd":"2023/11/03 22:44","title":"title","subtitle":"subtitle","alert":"alert","body":"body<div>body</div>"}</script>
+<script id="appModule">
+
+  const { createApp } = Vue
+
+  const dateConvert = (d) => {
+    var now = new Date()
+    if (d) {
+      now = new Date(d)
+    }
+    var Month = ("00" + (now.getMonth() + 1)).substr(-2)
+    var Da = ("00" + now.getDate()).substr(-2)
+    var Hour = ("00" + now.getHours()).substr(-2)
+    var Min = ("00" + now.getMinutes()).substr(-2)
+    var Sec = ("00" + now.getSeconds()).substr(-2)
+    return now.getFullYear() + "/" + Month + "/" + Da + " " + Hour + ":" + Min
+  }
+
+  var page = JSON.parse(document.getElementById("page").textContent)
+
+  const app = createApp({
+    data() {
+      return {
+        edit: false
+      }
+    },
+    methods: {},
+  })
+
+  app.component('a-a', {
+    data() {
+      return {
+        page, f: false
+      }
+    },
+    methods: {
+      goEdit: function () {
+        if (this.f) {
+          if (window.confirm('編集？')) {
+            this.$root.edit = true
+          }
+        }
+      }
+    },
+    template: `
+      <q-layout view="hHh LpR fFf">
+        <q-page-container>
+          <q-page padding>
+            <q-card flat bordered>
+              <q-card-section>
+                <div class="row items-center">
+                  <div class="col">
+                    <div class="text-h6" @dblclick="goEdit">{{page.title}}</div>
+                    <div class="text-subtitle1">{{page.subtitle}}</div>
+                  </div>
+                  <div>{{page.upd}} <span @dblclick="f = true">更新</span></div>
+                </div>
+              </q-card-section>
+            </q-card>
+            <q-card flat bordered class="q-mt-sm bg-blue-2" v-if="page.alert !== ''">
+              <q-card-section v-html="page.alert">
+              </q-card-section>
+            </q-card>
+            <div class="q-mt-md q-mx-sm" v-html="page.body"></div>
+          </q-page>
+        </q-page-container>
+      </q-layout>
+    `
+  })
+  //{ "id": "1", "upd": "sssss", "title": "aaaa", "subtitle": "aaaa", "alert": "aa", "body": "ddddd" }
+  app.component('b-b', {
+    data() {
+      return {
+        page
+      }
+    },
+    methods: {
+      save: function () {
+        this.page.upd = dateConvert()
+        document.getElementById("page").textContent = JSON.stringify(this.page)
+        var htmlText = `
+<!DOCTYPE html>
+<html lang="ja">
+
+`
+        htmlText += document.getElementsByTagName("head")[0].outerHTML
+        htmlText += `
+
+<body>
+  <div id="app">
+    <a-a v-if="!edit"></a-a>
+    <b-b v-if="edit"></b-b>
+  </div>
+</body>
+
+`
+        htmlText += document.getElementById("quesar1").outerHTML
+        htmlText += `
+`
+        htmlText += document.getElementById("quesar1").outerHTML
+        htmlText += `
+`
+        htmlText += document.getElementById("page").outerHTML
+        htmlText += `
+`
+        htmlText += document.getElementById("appModule").outerHTML
+        htmlText += `
+</html>`
+        const blob = new Blob([htmlText], { type: "text/plain" })
+        const link = document.createElement("a")
+        link.href = URL.createObjectURL(blob)
+        link.download = "download.html"
+        link.click()
+        URL.revokeObjectURL(link.href)
+      },
+      preview: function () {
+        page = this.page
+        this.$root.edit = false
+      },
+      editorDef: function () {
+        var a = [
+          [
+            {
+              label: this.$q.lang.editor.align,
+              icon: this.$q.iconSet.editor.align,
+              fixedLabel: true,
+              options: ['left', 'center', 'right', 'justify']
+            }
+          ],
+          ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
+          ['token', 'hr', 'link', 'custom_btn'],
+          [
+            {
+              label: this.$q.lang.editor.formatting,
+              icon: this.$q.iconSet.editor.formatting,
+              list: 'no-icons',
+              options: [
+                'p',
+                'h1',
+                'h2',
+                'h3',
+                'h4',
+                'h5',
+                'h6',
+                'code'
+              ]
+            },
+            {
+              label: this.$q.lang.editor.fontSize,
+              icon: this.$q.iconSet.editor.fontSize,
+              fixedLabel: true,
+              fixedIcon: true,
+              list: 'no-icons',
+              options: [
+                'size-1',
+                'size-2',
+                'size-3',
+                'size-4',
+                'size-5',
+                'size-6',
+                'size-7'
+              ]
+            },
+            'removeFormat'
+          ],
+          ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
+          ['undo', 'redo'],
+          ['fullscreen', 'viewsource']
+        ]
+        return a
+      }
+    },
+    template: `
+      <q-layout view="hHh LpR fFf">
+        <q-page-container>
+          <q-page padding>
+            <q-input outlined v-model="page.title" label="title" :rules="[val => !!val || 'Field is required']"></q-input>
+            <q-input outlined v-model="page.subtitle" label="subtitle" class="q-mt-sm"></q-input>
+            <div class="q-mt-sm">alert</div>
+            <q-editor v-model="page.alert" min-height="5rem" :toolbar="editorDef()"></q-editor>
+            <div class="q-mt-sm">body</div>
+            <q-editor v-model="page.body" min-height="5rem" :toolbar="editorDef()"></q-editor>
+            <div class="q-mt-md text-right">
+              <q-btn color="white" text-color="black" label="del_alert" @click="page.alert = ''"></q-btn>
+              <q-btn color="white" text-color="black" label="preview" v-if="page.title !== ''" class="q-ml-md" @click="preview"></q-btn>
+              <q-btn color="white" text-color="black" label="save" v-if="page.title !== ''" class="q-ml-md" @click="save"></q-btn>
+            </div>
+          </q-page>
+        </q-page-container>
+      </q-layout>
+    `
+  })
+
+  app.use(Quasar)
+  Quasar.lang.set(Quasar.lang.ja)
+  app.mount('#app')
+
+
+</script>
+</html>
