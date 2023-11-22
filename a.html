@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <style>
+    body {
+      background-color: aliceblue;
+      font-family: monospace;
+    }
+
+    #pageHeader {
+      background-color: lightsteelblue;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      font-size: larger;
+    }
+
+    table {
+      margin-top: 10px;
+      border-collapse: collapse;
+      border: 1px solid silver;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid silver;
+      padding: 5px;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="pageHeader"></div>
+
+  <div style="margin-top: 20px">summary</div>
+  <table id="summaryCont" style="width: auto"></table>
+
+  <div style="margin-top: 20px">overview</div>
+  <table>
+    <thead id="overviewHead"></thead>
+    <tbody id="overviewCont"></tbody>
+  </table>
+
+  <div style="margin-top: 20px">detail</div>
+  <table>
+    <thead id="detailHead"></thead>
+    <tbody id="detailCont"></tbody>
+  </table>
+
+  <div style="display: flex; margin-top: 30px;">
+    <div>&copy; 2023</div>
+    <div style="flex-grow: 1;"></div>
+    <div><a href="javascript:window.scrollTo(0, 0)">top</a></div>
+  </div>
+
+  <button popovertarget="d" popovertargetaction="show" style="margin-top: 30px">---</button>
+
+  <div id="d" popover style="border: 1px solid black; padding: 10px;">
+  </div>
+
+</body>
+
+<script type="application/json" id="overviewList">
+  [
+    { "user": "1", "aaaaaaaaa": "100" },
+    { "user": "2", "aaaaaaaaa": "90" },
+    { "user": "3", "aaaaaaaaa": "80" }
+  ]
+</script>
+
+<script type="application/json" id="detailList">
+  [
+    { "user": "1", "aaaaaaaaa": "100" },
+    { "user": "1", "aaaaaaaaa": "90" },
+    { "user": "2", "aaaaaaaaa": "80" }
+  ]
+</script>
+
+<script>
+
+  const innerHTML = {
+    pageHeader: () => {
+      return "a"
+    },
+    summary: () => {
+      return "a"
+    },
+    overview: () => {
+      var list = JSON.parse(document.getElementById("overviewList").textContent)
+      var html = ''
+      list.forEach((i) => {
+        html += '<tr>'
+        html += '<td><a href="javascript:overviewSelect(\'' + i.user + '\')">' + i.user + '</a></td>'
+        html += '<td>' + i.aaaaaaaaa + '</td>'
+        html += '</tr>'
+      })
+      return html
+    },
+    tableHead: (i) => {
+      var html = "<tr>"
+      i.forEach((t) => {
+        html += "<th>" + t + "</th>"
+      })
+      html += "</tr>"
+      return html
+    }
+  }
+
+  document.getElementById("pageHeader").innerHTML = innerHTML.pageHeader()
+  document.title = innerHTML.pageHeader()
+  document.getElementById("summaryCont").innerHTML = innerHTML.summary()
+  document.getElementById("overviewHead").innerHTML = innerHTML.tableHead(["a", "b"])
+  document.getElementById("overviewCont").innerHTML = innerHTML.overview()
+  document.getElementById("detailHead").innerHTML = innerHTML.tableHead(["a", "b"])
+  document.getElementById("detailCont").innerHTML = "no data found."
+  document.getElementById("d").innerHTML = `
+    <div>aa</div>
+    <div style="margin-top: 20px">
+      1: <input type="file" id="f1" accept="text/csv">
+    </div>
+    <div style="margin-top: 5px">
+      2: <input type="file" id="f2" accept="text/csv">
+    </div>
+    <div style="margin-top: 10px; text-align: right;">
+      <button onclick="make()">go</button>
+    </div>
+    <div style="margin-top: 0px">a</div>
+  ` 
+
+  const overviewSelect = (v) => {
+    document.getElementById("detailCont").innerHTML = "Now Loading..."
+    var list = JSON.parse(document.getElementById("detailList").textContent)
+    list = list.filter((i) => i.user == v)
+    var html = ""
+    if (list.length !== 0) {
+      list.forEach((i) => {
+        html += '<tr>'
+        html += '<td></td>'
+        html += '<td>' + i.aaaaaaaaa + '</td>'
+        html += '</tr>'
+      })
+    } else {
+      html = "no data found."
+    }
+    document.getElementById("detailCont").innerHTML = html
+  }
+
+  const make = () => {
+
+  }
+
+</script>
+
+</html>
